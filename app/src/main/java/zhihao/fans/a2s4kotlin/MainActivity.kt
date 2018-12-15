@@ -9,7 +9,7 @@ import com.qmuiteam.qmui.widget.dialog.QMUIDialog
 
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.Toast
-
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
                         .setTitle("标题")
                         .setMessage("确定要发送吗？")
                         .addAction("取消") { dialog, index -> dialog.dismiss() }
-                        .addAction("你好") { dialog, index ->
+                        .addAction(0,"你好", QMUIDialogAction.ACTION_PROP_NEGATIVE) { dialog, index ->
                             Toast.makeText(this, "你好", Toast.LENGTH_SHORT).show()
                         }
                         .addAction("确定") { dialog, index ->
