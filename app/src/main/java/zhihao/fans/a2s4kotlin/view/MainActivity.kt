@@ -1,9 +1,8 @@
-package zhihao.fans.a2s4kotlin
+package zhihao.fans.a2s4kotlin.view
 
-import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.design.widget.Snackbar
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -12,11 +11,18 @@ import android.widget.Toast
 import com.qmuiteam.qmui.util.QMUIDisplayHelper
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction
+import com.qmuiteam.qmui.widget.dialog.QMUITipDialog
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
+import zhihao.fans.a2s4kotlin.R
+import zhihao.fans.a2s4kotlin.kotlinEx.getAppIconDrawable
+import zhihao.fans.a2s4kotlin.kotlinEx.getAppName
+import zhihao.fans.a2s4kotlin.util.AppUtil
+import zhihao.fans.a2s4kotlin.util.QMUIUtil
 
 
 class MainActivity : AppCompatActivity() {
@@ -26,7 +32,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        this.init()
+        try {
+            init()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            QMUIUtil.alertOneButton(this, "错误", "初始化失败", "OK",
+                QMUIDialogAction.ActionListener { dialog, _ ->
+                    dialog.dismiss()
+                })
+        }
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action") {
@@ -65,29 +79,67 @@ class MainActivity : AppCompatActivity() {
 
     private fun init() {
         val size = QMUIDisplayHelper.dp2px(this, 20)
-        QMUIGroupListView.newSection(this)
-            .setTitle("Section 1: 默认提供的样式")
-            .setDescription("Section 1 的描述")
-            .setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
-            .addItemView(getQmuiCommonListItemView(this, groupListView, "1", "5", R.mipmap.ic_launcher)) { toast("hi") }
-            .addItemView(getQmuiCommonListItemView(this, groupListView, "2", "4", R.mipmap.ic_launcher)) { toast("hi") }
-            .addItemView(getQmuiCommonListItemView(this, groupListView, "3", "3", R.mipmap.ic_launcher)) { toast("hi") }
-            .addItemView(getQmuiCommonListItemView(this, groupListView, "4", "2", R.mipmap.ic_launcher)) { toast("hi") }
-            .addItemView(getQmuiCommonListItemView(this, groupListView, "5", "1", R.mipmap.ic_launcher)) { toast("hi") }
-            .addTo(groupListView)
+        val mContext = this@MainActivity
+        val tipDialog = QMUITipDialog.Builder(mContext)
+            .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
+            .setTipWord("正在加载")
+            .create()
+        tipDialog.show()
+        doAsync {
+            val appList = AppUtil.getAppList()
+            if (appList == null) {
+                uiThread {
+                    QMUIUtil.alertOneButton(
+                        mContext, "错误", "获取应用列表失败", "OK",
+                        QMUIDialogAction.ActionListener { dialog, _ ->
+                            dialog.dismiss()
+                        })
+                }
+            } else {
+                val section = QMUIGroupListView.newSection(mContext)
+                section.apply {
+                    setTitle("应用列表")
+                    setDescription("下面没了")
+                    setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
+                    appList.map { applicationInfo ->
+                        addItemView(
+                            getQmuiCommonListItemView(
+                                groupListView,
+                                applicationInfo.getAppName() ?: "(获取应用名称失败)",
+                                applicationInfo.packageName,
+                                applicationInfo.getAppIconDrawable()
+                            )
+                        ) {
+                            QMUIUtil.alertOneButton(
+                                mContext,
+                                applicationInfo.packageName,
+                                "应用名称：" + applicationInfo.getAppName(),
+                                "OK",
+                                QMUIDialogAction.ActionListener { dialog, _ ->
+                                    dialog.dismiss()
+                                })
+                        }
+                    }
+                }
+                uiThread {
+                    section.addTo(groupListView)
+                    tipDialog.dismiss()
+                }
+            }
+        }
     }
 
     private fun getQmuiCommonListItemView(
-        context: Context,
         mGroupListView: QMUIGroupListView,
         title: String,
         detailText: String? = null,
-        icon: Int
+        icon: Drawable?
     ): QMUICommonListItemView = mGroupListView.createItemView(
-        ContextCompat.getDrawable(context, icon),
+        icon ?: getDrawable(R.mipmap.ic_launcher),
         title,
         detailText,
         QMUICommonListItemView.HORIZONTAL,
         QMUICommonListItemView.ACCESSORY_TYPE_NONE
     )
+
 }
