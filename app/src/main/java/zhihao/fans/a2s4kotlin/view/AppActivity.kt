@@ -14,8 +14,8 @@ import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main.*
+import kotlinx.android.synthetic.main.activity_app.*
+import kotlinx.android.synthetic.main.content_app.*
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import zhihao.fans.a2s4kotlin.R
@@ -25,13 +25,13 @@ import zhihao.fans.a2s4kotlin.util.AppUtil
 import zhihao.fans.a2s4kotlin.util.QMUIUtil
 
 
-class MainActivity : AppCompatActivity() {
+class AppActivity : AppCompatActivity() {
 
     private val mCurrentDialogStyle = com.qmuiteam.qmui.R.style.QMUI_Dialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar_main)
+        setContentView(R.layout.activity_app)
+        setSupportActionBar(toolbar_app)
         try {
             init()
         } catch (e: Exception) {
@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
                     dialog.dismiss()
                 })
         }
-        fab_main.setOnClickListener { view ->
+        fab_app.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action") {
                     QMUIDialog.MessageDialogBuilder(this)
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun init() {
         val size = QMUIDisplayHelper.dp2px(this, 20)
-        val mContext = this@MainActivity
+        val mContext = this@AppActivity
         val tipDialog = QMUITipDialog.Builder(mContext)
             .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
             .setTipWord("正在加载")
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                     appList.map { applicationInfo ->
                         addItemView(
                             getQmuiCommonListItemView(
-                                groupListView_main,
+                                groupListView_app,
                                 applicationInfo.getAppName() ?: "(获取应用名称失败)",
                                 applicationInfo.packageName,
                                 applicationInfo.getAppIconDrawable()
@@ -122,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 uiThread {
-                    section.addTo(groupListView_main)
+                    section.addTo(groupListView_app)
                     tipDialog.dismiss()
                 }
             }

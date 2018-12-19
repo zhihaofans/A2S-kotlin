@@ -6,8 +6,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:showIn="@layout/activity_main"
-        tools:context=".view.MainActivity">
+        tools:showIn="@layout/activity_app"
+        tools:context=".view.AppActivity">
     <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -15,7 +15,7 @@
             android:fitsSystemWindows="true">
 
         <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
-                android:id="@+id/groupListView_main"
+                android:id="@+id/groupListView_app"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
