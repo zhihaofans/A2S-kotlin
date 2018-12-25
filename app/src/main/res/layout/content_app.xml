@@ -8,16 +8,21 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:showIn="@layout/activity_app"
         tools:context=".view.AppActivity">
-    <ScrollView
+    <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
+            android:id="@+id/pull2refresh_app"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/qmui_config_color_background"
-            android:fitsSystemWindows="true">
-
-        <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
-                android:id="@+id/groupListView_app"
+            android:layout_height="match_parent">
+        <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent"
+                android:background="@color/qmui_config_color_background"
+                android:fitsSystemWindows="true">
 
-    </ScrollView>
+            <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+                    android:id="@+id/groupListView_app"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+        </ScrollView>
+    </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>
 </android.support.constraint.ConstraintLayout>

@@ -1,39 +1,57 @@
 package zhihao.fans.a2s4kotlin.view
 
+import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
-import android.view.Menu
-import android.view.MenuItem
+import android.view.KeyEvent
 import android.view.ViewGroup
-import android.widget.Toast
 import com.qmuiteam.qmui.util.QMUIDisplayHelper
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction
-import com.qmuiteam.qmui.widget.dialog.QMUITipDialog
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
+import dev.utils.app.logger.DevLogger
 import kotlinx.android.synthetic.main.activity_app.*
 import kotlinx.android.synthetic.main.content_app.*
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
 import zhihao.fans.a2s4kotlin.R
 import zhihao.fans.a2s4kotlin.kotlinEx.getAppIconDrawable
 import zhihao.fans.a2s4kotlin.kotlinEx.getAppName
+import zhihao.fans.a2s4kotlin.util.AppShortcutsUtil
 import zhihao.fans.a2s4kotlin.util.AppUtil
 import zhihao.fans.a2s4kotlin.util.QMUIUtil
 
 
 class AppActivity : AppCompatActivity() {
-
+    private val appShortcutsUtil = AppShortcutsUtil(this@AppActivity)
     private val mCurrentDialogStyle = com.qmuiteam.qmui.R.style.QMUI_Dialog
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_app)
         setSupportActionBar(toolbar_app)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         try {
             init()
+            pull2refresh_app.setOnPullListener(object : QMUIPullRefreshLayout.OnPullListener {
+                override fun onMoveTarget(offset: Int) {
+
+                }
+
+                override fun onMoveRefreshView(offset: Int) {
+
+                }
+
+                override fun onRefresh() {
+                    //pull2refresh_app.postDelayed({ pull2refresh_app.finishRefresh() }, 2000)
+                    init()
+                }
+            })
         } catch (e: Exception) {
             e.printStackTrace()
             QMUIUtil.alertOneButton(this, "错误", "初始化失败", "OK",
@@ -49,11 +67,11 @@ class AppActivity : AppCompatActivity() {
                         .setMessage("确定要发送吗？")
                         .addAction("取消") { dialog, index -> dialog.dismiss() }
                         .addAction(0, "你好", QMUIDialogAction.ACTION_PROP_NEGATIVE) { dialog, index ->
-                            Toast.makeText(this, "你好", Toast.LENGTH_SHORT).show()
+                            toast("你好")
                         }
                         .addAction("确定") { dialog, index ->
                             dialog.dismiss()
-                            Toast.makeText(this, "发送成功", Toast.LENGTH_SHORT).show()
+                            toast("发送成功")
                         }
                         .create(mCurrentDialogStyle).show()
                 }.show()
@@ -61,29 +79,18 @@ class AppActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish()
         }
+        return false
     }
 
     private fun init() {
         val size = QMUIDisplayHelper.dp2px(this, 20)
         val mContext = this@AppActivity
-        val tipDialog = QMUITipDialog.Builder(mContext)
-            .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
-            .setTipWord("正在加载")
-            .create()
+        val tipDialog = QMUIUtil.tipAlertLoading(mContext, "正在加载")
         tipDialog.show()
         doAsync {
             val appList = AppUtil.getAppList()
@@ -110,14 +117,17 @@ class AppActivity : AppCompatActivity() {
                                 applicationInfo.getAppIconDrawable()
                             )
                         ) {
-                            QMUIUtil.alertOneButton(
-                                mContext,
-                                applicationInfo.packageName,
-                                "应用名称：" + applicationInfo.getAppName(),
-                                "OK",
-                                QMUIDialogAction.ActionListener { dialog, _ ->
-                                    dialog.dismiss()
-                                })
+                            DevLogger.d(applicationInfo.packageName)
+                            val activities =
+                                AppUtil.getAppActivity(this@AppActivity, applicationInfo.packageName)
+                            if (activities.isNullOrEmpty()) {
+                                val failTipDialog = QMUIUtil.tipAlertFail(mContext, "该应用没有活动(Activity)可以使用", true)
+                                failTipDialog.show()
+                                groupListView_app.postDelayed({ failTipDialog.dismiss() }, 2000)
+                            } else {
+                                addAppShortcuts(applicationInfo)
+
+                            }
                         }
                     }
                 }
@@ -142,4 +152,8 @@ class AppActivity : AppCompatActivity() {
         QMUICommonListItemView.ACCESSORY_TYPE_NONE
     )
 
+    private fun addAppShortcuts(applicationInfo: ApplicationInfo) {
+        //appShortcutsUtil.addShortcut()
+        startActivity<ActivitiesActivity>("applicationInfo" to applicationInfo)
+    }
 }

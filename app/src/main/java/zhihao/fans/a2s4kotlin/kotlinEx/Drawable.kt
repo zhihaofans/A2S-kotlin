@@ -12,5 +12,22 @@ import android.graphics.drawable.Drawable
 
  */
 fun Drawable.toBitmap(): Bitmap? {
-    return (this as BitmapDrawable).bitmap
+    return try {
+        (this as BitmapDrawable).bitmap
+    } catch (e: Exception) {
+        e.printStackTrace()
+        this.toBitmap2()
+    }
+}
+
+fun Drawable.toBitmap2(): Bitmap? {
+    return try {
+        val w = this.intrinsicWidth
+        val h = this.intrinsicHeight
+        Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+
 }

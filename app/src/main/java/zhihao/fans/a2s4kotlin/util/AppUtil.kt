@@ -1,5 +1,7 @@
 package zhihao.fans.a2s4kotlin.util
 
+import android.content.Context
+import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import dev.utils.app.AppUtils
@@ -30,6 +32,15 @@ class AppUtil {
                     else -> it.packageName
                 }
             }
+        }
+
+        fun getAppActivity(context: Context, packageName: String): Array<out ActivityInfo>? {
+            val pm = context.packageManager
+
+            val info = pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
+
+            val list = info.activities
+            return list
         }
     }
 }

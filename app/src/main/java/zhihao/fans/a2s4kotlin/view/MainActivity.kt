@@ -2,21 +2,20 @@ package zhihao.fans.a2s4kotlin.view
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup
-import android.widget.Toast
 import com.qmuiteam.qmui.util.QMUIDisplayHelper
-import com.qmuiteam.qmui.widget.dialog.QMUIDialog
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+import dev.utils.app.logger.DevLogger
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.uiThread
 import zhihao.fans.a2s4kotlin.R
 import zhihao.fans.a2s4kotlin.kotlinEx.getAppIconDrawable
@@ -32,32 +31,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar_main)
+        DevLogger.d("init")
         try {
-            init()
+            //init()
         } catch (e: Exception) {
             e.printStackTrace()
-            QMUIUtil.alertOneButton(this, "错误", "初始化失败", "OK",
+            DevLogger.e("init failed")
+            QMUIUtil.alertOneButton(
+                this, "错误", "初始化失败", "退出",
                 QMUIDialogAction.ActionListener { dialog, _ ->
                     dialog.dismiss()
+                    finish()
                 })
         }
         fab_main.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action") {
-                    QMUIDialog.MessageDialogBuilder(this)
-                        .setTitle("标题")
-                        .setMessage("确定要发送吗？")
-                        .addAction("取消") { dialog, index -> dialog.dismiss() }
-                        .addAction(0, "你好", QMUIDialogAction.ACTION_PROP_NEGATIVE) { dialog, index ->
-                            Toast.makeText(this, "你好", Toast.LENGTH_SHORT).show()
-                        }
-                        .addAction("确定") { dialog, index ->
-                            dialog.dismiss()
-                            Toast.makeText(this, "发送成功", Toast.LENGTH_SHORT).show()
-                        }
-                        .create(mCurrentDialogStyle).show()
-                }.show()
-
+            startActivity<AppActivity>()
         }
     }
 
