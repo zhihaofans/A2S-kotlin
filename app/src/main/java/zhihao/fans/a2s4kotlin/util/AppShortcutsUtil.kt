@@ -2,12 +2,10 @@ package zhihao.fans.a2s4kotlin.util
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.LauncherApps
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
-import android.util.DisplayMetrics
 
 /**
 
@@ -18,11 +16,20 @@ import android.util.DisplayMetrics
  */
 class AppShortcutsUtil(context: Context) {
     private val mContext = context
-    fun getAppShortcuts() {
+    fun getAppShortcuts(): List<AppShortcutItem>? {
         val shortcutManager = mContext.getSystemService<ShortcutManager>(ShortcutManager::class.java)
-        shortcutManager.dynamicShortcuts.map {
-
+        return try {
+            val dynamicShortcuts = shortcutManager.dynamicShortcuts
+            dynamicShortcuts.map { shortcutsItem ->
+                AppShortcutItem(
+                    shortcutsItem.id, shortcutsItem.shortLabel.toString(), shortcutsItem.longLabel.toString(),
+                    getAppShortcutIcon(shortcutsItem), shortcutsItem.intent, shortcutsItem
+                )
+            }.toList()
+        } catch (e: IllegalStateException) {
+            null
         }
+
     }
     fun addShortcut(id: String, shortLabel: String, longLabel: String, icon: Icon, intent: Intent): Boolean {
         val shortcut = ShortcutInfo.Builder(mContext, id)
@@ -41,19 +48,29 @@ class AppShortcutsUtil(context: Context) {
         return addShortcuts(listOf(shortcut))
     }
 
-    fun addShortcuts(shortcuts: List<ShortcutInfo>): Boolean {
-        return mContext.getSystemService<ShortcutManager>(ShortcutManager::class.java)!!.addDynamicShortcuts(shortcuts)
+    private fun addShortcuts(shortcuts: List<ShortcutInfo>): Boolean {
+        return try {
+            mContext.getSystemService<ShortcutManager>(ShortcutManager::class.java)!!.addDynamicShortcuts(shortcuts)
+        } catch (e: Exception) {
+            false
+        }
     }
 
+    fun remove(shortcutId: String) {
+        mContext.getSystemService<ShortcutManager>(ShortcutManager::class.java)!!.removeDynamicShortcuts(
+            listOf(
+                shortcutId
+            )
+        )
+    }
     fun removeAll() {
         mContext.getSystemService<ShortcutManager>(ShortcutManager::class.java).removeAllDynamicShortcuts()
     }
 
-    fun getAppShortcutIcon(shortcutInfo: ShortcutInfo): Drawable? {
-        val launcherApps = mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+    private fun getAppShortcutIcon(shortcutInfo: ShortcutInfo): Drawable? {
         return try {
-            launcherApps.getShortcutIconDrawable(shortcutInfo, DisplayMetrics.DENSITY_DEFAULT)
-        } catch (e: IllegalStateException) {
+            mContext.packageManager.getActivityIcon(shortcutInfo.intent.component)
+        } catch (e: Exception) {
             null
         }
     }
@@ -63,6 +80,7 @@ data class AppShortcutItem(
     val id: String,
     val shortLabel: String,
     val longLabel: String,
-    val icon: Drawable,
-    val intent: Intent
+    val icon: Drawable?,
+    val intent: Intent,
+    val shortcutInfo: ShortcutInfo
 )

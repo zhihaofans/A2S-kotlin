@@ -26,11 +26,11 @@
         </activity>
         <activity
                 android:name=".view.AppActivity"
-                android:label="@string/title_activity_app">
+                android:label="@string/text_app_list">
         </activity>
         <activity
                 android:name=".view.ActivitiesActivity"
-                android:label="@string/title_activity_activities">
+                android:label="@string/text_activities">
         </activity>
     </application>
 

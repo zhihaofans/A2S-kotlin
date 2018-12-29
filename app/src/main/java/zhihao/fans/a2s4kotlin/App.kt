@@ -1,10 +1,9 @@
 package zhihao.fans.a2s4kotlin
 
 import android.app.Application
+import com.orhanobut.logger.AndroidLogAdapter
+import com.orhanobut.logger.Logger
 import dev.DevUtils
-import dev.utils.app.logger.DevLogger
-import dev.utils.app.logger.LogConfig
-import dev.utils.app.logger.LogLevel
 
 
 /**
@@ -18,11 +17,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         DevUtils.init(this)
-        val logConfig = LogConfig()
-        logConfig.logLevel = LogLevel.DEBUG
-        logConfig.tag = "zhihao.fans.a2s4kotlin.log"
-        DevLogger.init(logConfig)
-        DevUtils.openLog()
-        DevUtils.openDebug()
+        Logger.addLogAdapter(AndroidLogAdapter())
     }
 }

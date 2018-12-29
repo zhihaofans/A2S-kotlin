@@ -44,6 +44,8 @@ class QMUIUtil {
                 .setTitle(title)
                 .setMessage(message)
                 .addAction(buttonText, listener)
+                .setCancelable(false)
+                .setCanceledOnTouchOutside(false)
                 .create(mCurrentDialogStyle).show()
         }
 
@@ -59,6 +61,8 @@ class QMUIUtil {
                 .setMessage(message)
                 .addAction(buttonOneText, listenerOne)
                 .addAction(buttonTwoText, listenerTwo)
+                .setCancelable(false)
+                .setCanceledOnTouchOutside(false)
                 .create(mCurrentDialogStyle).show()
         }
 

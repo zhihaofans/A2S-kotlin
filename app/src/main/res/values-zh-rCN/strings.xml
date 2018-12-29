@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">设置</string>
+    <string name="text_app_list">应用列表</string>
+    <string name="text_activities">活动</string>
+</resources>
