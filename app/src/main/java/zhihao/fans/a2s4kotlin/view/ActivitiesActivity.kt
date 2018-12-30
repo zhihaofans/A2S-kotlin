@@ -1,5 +1,6 @@
 package zhihao.fans.a2s4kotlin.view
 
+import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Icon
 import android.os.Bundle
@@ -7,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.text.InputType
 import android.view.KeyEvent
 import android.view.ViewGroup
+import com.orhanobut.logger.Logger
 import com.qmuiteam.qmui.util.QMUIDisplayHelper
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction
@@ -50,7 +52,6 @@ class ActivitiesActivity : AppCompatActivity() {
     }
 
     private fun init() {
-        appShortcutsUtil.removeAll()
         if (intent.extras !== null) {
             val mApplicationInfo = intent.extras!!.get("applicationInfo") as ApplicationInfo?
             if (mApplicationInfo == null) {
@@ -93,10 +94,22 @@ class ActivitiesActivity : AppCompatActivity() {
                 setDescription("下面没了")
                 setLeftIconSize(size, ViewGroup.LayoutParams.WRAP_CONTENT)
                 activities.map { mActivity ->
+                    mActivity.isEnabled
                     val mClassName = mActivity.name
-                    if (ActivityUtils.isActivityExists(mContext, mApplicationInfo.packageName, mClassName)) {
+                    if (ActivityUtils.isActivityExists(
+                            mContext,
+                            mApplicationInfo.packageName,
+                            mClassName
+                        ) && mActivity.isEnabled && mActivity.exported
+                    ) {
                         val activityIcon =
-                            AppUtil.getActivityIcon(mContext, mApplicationInfo.packageName, mClassName)
+                            mContext.packageManager.getActivityIcon(
+                                ComponentName(
+                                    mApplicationInfo.packageName,
+                                    mClassName
+                                )
+                            )
+                        Logger.d(activityIcon)
                         val activityTitle = mActivity.loadLabel(packageManager).toString()
                         val addText = if (activityTitle.isEmpty()) "" else " ($activityTitle)"
                         addItemView(

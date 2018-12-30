@@ -12,12 +12,13 @@ import android.graphics.drawable.Drawable
 
  */
 fun Drawable.toBitmap(): Bitmap? {
-    return try {
+    val mBitmap = try {
         (this as BitmapDrawable).bitmap
     } catch (e: Exception) {
         e.printStackTrace()
         this.toBitmap2()
     }
+    return mBitmap
 }
 
 fun Drawable.toBitmap2(): Bitmap? {

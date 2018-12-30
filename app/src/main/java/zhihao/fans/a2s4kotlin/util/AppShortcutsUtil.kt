@@ -20,19 +20,21 @@ class AppShortcutsUtil(context: Context) {
         val shortcutManager = mContext.getSystemService<ShortcutManager>(ShortcutManager::class.java)
         return try {
             val dynamicShortcuts = shortcutManager.dynamicShortcuts
-            dynamicShortcuts.map { shortcutsItem ->
+            val mR = dynamicShortcuts.map { shortcutsItem ->
                 AppShortcutItem(
                     shortcutsItem.id, shortcutsItem.shortLabel.toString(), shortcutsItem.longLabel.toString(),
                     getAppShortcutIcon(shortcutsItem), shortcutsItem.intent, shortcutsItem
                 )
             }.toList()
-        } catch (e: IllegalStateException) {
+            mR
+        } catch (e: Exception) {
             null
         }
 
     }
     fun addShortcut(id: String, shortLabel: String, longLabel: String, icon: Icon, intent: Intent): Boolean {
-        val shortcut = ShortcutInfo.Builder(mContext, id)
+        return try {
+            val shortcut = ShortcutInfo.Builder(mContext, id)
             .setShortLabel(shortLabel)
             .setLongLabel(longLabel)
             //.setIcon(Icon.createWithResource(mContext, R.drawable.icon_website))
@@ -45,12 +47,32 @@ class AppShortcutsUtil(context: Context) {
             )*/
             .setIntent(intent)
             .build()
-        return addShortcuts(listOf(shortcut))
+            addShortcuts(listOf(shortcut))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 
     private fun addShortcuts(shortcuts: List<ShortcutInfo>): Boolean {
+        val shortcutManager = mContext.getSystemService<ShortcutManager>(ShortcutManager::class.java)
+        val shortcutsMax = shortcutManager.maxShortcutCountPerActivity
         return try {
-            mContext.getSystemService<ShortcutManager>(ShortcutManager::class.java)!!.addDynamicShortcuts(shortcuts)
+            val shortcutsList = getAppShortcuts()
+            if (shortcutsList.isNullOrEmpty()) {
+                shortcutManager.addDynamicShortcuts(shortcuts)
+            } else {
+                if (shortcutsList.size == shortcutsMax || (shortcutsList.size + shortcuts.size > shortcutsMax)) return false
+                val newList = mutableListOf<ShortcutInfo>()
+                shortcutsList.map {
+                    newList.add(it.shortcutInfo)
+                }
+                shortcuts.map {
+                    newList.add(it)
+                }
+                if (newList.size > shortcutsMax) return false
+                shortcutManager.addDynamicShortcuts(shortcuts)
+            }
         } catch (e: Exception) {
             false
         }
